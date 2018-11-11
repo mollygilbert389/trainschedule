@@ -1,0 +1,19 @@
+
+body {
+    background: url("dark-triangles.png");
+}
+
+#title {
+    text-align: center;
+}
+
+#titleBox {
+    margin-top: 10px; 
+    background-color: #0b0eda91;
+    color: white;
+    border: white solid 5px;
+}
+
+#trainTable {
+    text-align: center;
+}
