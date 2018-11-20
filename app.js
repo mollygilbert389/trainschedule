@@ -11,42 +11,47 @@
 
   var database = firebase.database();
 
-  var trainName = ""
-  var destination = ""
-  var firstTrain = ""
-  var frequency = ""
-  var newT = Date.now();
-    //var format = moment("HH:mm")
+  var trainName = "";
+  var destination = "";
+  var firstTrain = "";
+  var frequency = "";
 
   $("#submitBtn").on("click", function(){
     event.preventDefault();
 
-    trainName = $("#trainName").val().trim();
-    destination = $("#destination").val().trim();
-    firstTrain = $("#firstTime").val().trim();
+   trainName = $("#trainName").val().trim();
+   destination = $("#destination").val().trim();
+   firstTrain = $("#firstTime").val().trim();
     frequency = $("#frequency").val().trim();
-
+    
+    $(".form-field").val('');
+    
     console.log(trainName)
 
-    var trainInfo = {
-    trainName: trainName,
-    destination: destination,
-    firstTrain: firstTrain,
-    frequency: frequency,
-    dateAdded: firebase.database.ServerValue.TIMESTAMP,
-    }
+    database.ref().push({
+        trainName: trainName,
+        destination: destination,
+        firstTrain: firstTrain,
+        frequency: frequency,
+        dateAdded: firebase.database.ServerValue.TIMESTAMP,
+        });
 
-database.ref().push(trainInfo)
-
-
+        sessionStorage.clear();
+    
 });
 
-database.ref().orderByChild("dateAdded").on("child_added", function(snapshot){
-    newT = new Date();
-    var data = snapshot.val();
-    var nextTrain = data.frequency+data.firstTrain
-    // format.moment(dateAdded)
-    $("#tbody").append("<tr> <td>"+data.trainName+"</td><td>"+data.destination+"</td><td>"+data.firstTrain+"</td><td>"+data.frequency+"</td><td>"+nextTrain+"</td><td>");
+database.ref().on("child_added", function(childsnapshot){
+    var timeConverted = moment(childsnapshot.val().firstTrain,"hh:mm").subtract(1, "years"); 
+    console.log(timeConverted);
+    var diffTime = moment().diff(moment(timeConverted),"minutes");
+    console.log(diffTime);
+    var tRemain = diffTime % childsnapshot.val().frequency;
+    console.log(tRemain);
+    var minTime = childsnapshot.val().frequency-tRemain;
+    console.log(minTime);
+    var nextTrain = moment().add(minTime,"minutes");
+    console.log(nextTrain);
+    $("#tbody").append("<tr> <td>"+childsnapshot.val().trainName+"</td><td>"+childsnapshot.val().destination+"</td><td>"+childsnapshot.val().frequency+"</td><td>"+moment(nextTrain).format("LT")+"</td><td>"+minTime+"</td><td>");
 
   });
 
